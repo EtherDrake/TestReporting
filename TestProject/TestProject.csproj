@@ -173,6 +173,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Methods\Timer.cs" />
     <Compile Include="Models\GraphSkill.cs" />
     <Compile Include="Models\GraphSkillVacancy.cs" />
     <Compile Include="Models\Reporting.cs" />
