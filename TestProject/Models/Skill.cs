@@ -5,7 +5,7 @@ using System.Web;
 
 namespace TestProject.Models
 {
-    public class Skill
+    public class Skill : IEntity
     {
         public int id { get; set; }
         public string title { get; set; }

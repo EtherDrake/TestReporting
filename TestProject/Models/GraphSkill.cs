@@ -5,7 +5,7 @@ using System.Web;
 
 namespace TestProject.Models
 {
-    public class GraphSkill
+    public class GraphSkill:IEntity
     {
         public int id { get; set; }
         public int? parent_skill { get; set; }

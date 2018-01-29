@@ -9,17 +9,19 @@ using System.Web;
 using System.Web.Mvc;
 using TestProject.Contexts;
 using TestProject.Models;
+using TestProject.Repository;
 
 namespace TestProject.Controllers
 {
     public class ReportingsController : Controller
     {
-        private DataContext db = new DataContext();
+        //private DataContext db = new DataContext();
+        ReportingRepository repo = new ReportingRepository();
 
         // GET: Reportings
         public ActionResult Index()
         {
-            return View(db.Reporting.ToList());
+            return View(repo.GetAll());
         }
 
         // GET: Reportings/Details/5
@@ -29,7 +31,7 @@ namespace TestProject.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Reporting reporting = db.Reporting.Find(id);
+            Reporting reporting = repo.Get(id.Value);
             if (reporting == null)
             {
                 return HttpNotFound();
@@ -61,19 +63,7 @@ namespace TestProject.Controllers
                 ////ViewBag.Count = reportings.ToList().Count();
                 ////List<Reporting> repsToAdd = reportings.ToList();
                 //var lst=reportings.ToList().Select(r => new Reporting { skill = r.skill, date = r.date, count = r.count }).ToList();
-                var list = db.Database.SqlQuery<ReportingExtractionModel>(
-                    "SELECT skills.title AS skill, DATE(vacancies.created_at) AS date, COUNT(vacancies.id) AS count " +
-                    "FROM vacancies INNER JOIN graph_skill_vacancies ON vacancies.id = graph_skill_vacancies.vacancy_id " +
-                    "INNER JOIN graph_skill ON graph_skill_vacancies.graph_skill_id=graph_skill.id " +
-                    "INNER JOIN skills ON graph_skill.related_skill=skills.id " +
-                    "WHERE DATE(vacancies.created_at) = '"+ reportingView.date.ToString("yyyy-MM-dd") + "' GROUP BY skills.title, date ORDER BY date").ToList();
-                var listToAdd = Mapper.Map<List<ReportingExtractionModel>, List<Reporting>>(list);
-                for (int i=0;i< listToAdd.Count;i++)
-                {
-
-                    db.Reporting.Add(listToAdd[i]);
-                    db.SaveChanges();
-                }
+                repo.reportingUpdate(reportingView.date);
                 //db.Reporting.Add(reporting);
                 //db.SaveChanges();
                 return RedirectToAction("Index");
@@ -90,7 +80,7 @@ namespace TestProject.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Reporting reporting = db.Reporting.Find(id);
+            Reporting reporting = repo.Get(id.Value);
             if (reporting == null)
             {
                 return HttpNotFound();
@@ -107,8 +97,7 @@ namespace TestProject.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(reporting).State = EntityState.Modified;
-                db.SaveChanges();
+                repo.Edit(reporting);
                 return RedirectToAction("Index");
             }
             return View(reporting);
@@ -121,7 +110,7 @@ namespace TestProject.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Reporting reporting = db.Reporting.Find(id);
+            Reporting reporting = repo.Get(id.Value);
             if (reporting == null)
             {
                 return HttpNotFound();
@@ -134,9 +123,8 @@ namespace TestProject.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Reporting reporting = db.Reporting.Find(id);
-            db.Reporting.Remove(reporting);
-            db.SaveChanges();
+            Reporting reporting = repo.Get(id);
+            repo.Delete(reporting);
             return RedirectToAction("Index");
         }
 
@@ -144,7 +132,7 @@ namespace TestProject.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                //db.Dispose();
             }
             base.Dispose(disposing);
         }

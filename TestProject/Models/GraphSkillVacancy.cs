@@ -5,7 +5,7 @@ using System.Web;
 
 namespace TestProject.Models
 {
-    public class GraphSkillVacancy
+    public class GraphSkillVacancy : IEntity
     {
         public int id { get; set; }
         public int graph_skill_id { get; set; }

@@ -5,7 +5,7 @@ using System.Web;
 
 namespace TestProject.Models
 {
-    public class Vacancy
+    public class Vacancy : IEntity
     {
         public int id { get; set; }
         public string link { get; set; }
