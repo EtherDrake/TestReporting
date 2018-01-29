@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -51,19 +52,35 @@ namespace TestProject.Controllers
         {
             if (ModelState.IsValid)
             {
-                //List<Reporting> reportings;
-                //reportings = from skill in db.Skills
-                //             join gskill in db.GraphSkill on skill.id equals gskill.related_skill
-                //             join gskillv in db.GraphSkillVacancy on gskill.id equals gskillv.graph_skill_id
-                //             join vacancy in db.Vacancies on gskillv.vacancy_id equals vacancy.id
-                //             where vacancy.created_at == reportingView.date group skill by skill.title into skillGroup
-                //             select new Reporting() { skill = skillGroup.title, date= }
+                //var reportings = from skill in db.Skills
+                //                 join gskill in db.GraphSkill on skill.id equals gskill.related_skill
+                //                 join gskillv in db.GraphSkillVacancy on gskill.id equals gskillv.graph_skill_id
+                //                 join vacancy in db.Vacancies on gskillv.vacancy_id equals vacancy.id
+                //                 where vacancy.created_at == reportingView.date
+                //                 select new { skill = skill.title, date = vacancy.created_at.Value, count = vacancy.link.Count() };
+                ////ViewBag.Count = reportings.ToList().Count();
+                ////List<Reporting> repsToAdd = reportings.ToList();
+                //var lst=reportings.ToList().Select(r => new Reporting { skill = r.skill, date = r.date, count = r.count }).ToList();
+                var list = db.Database.SqlQuery<ReportingExtractionModel>(
+                    "SELECT skills.title AS skill, DATE(vacancies.created_at) AS date, COUNT(vacancies.id) AS count " +
+                    "FROM vacancies INNER JOIN graph_skill_vacancies ON vacancies.id = graph_skill_vacancies.vacancy_id " +
+                    "INNER JOIN graph_skill ON graph_skill_vacancies.graph_skill_id=graph_skill.id " +
+                    "INNER JOIN skills ON graph_skill.related_skill=skills.id " +
+                    "WHERE DATE(vacancies.created_at) = '"+ reportingView.date.ToString("yyyy-MM-dd") + "' GROUP BY skills.title, date ORDER BY date").ToList();
+                var listToAdd = Mapper.Map<List<ReportingExtractionModel>, List<Reporting>>(list);
+                for (int i=0;i< listToAdd.Count;i++)
+                {
+
+                    db.Reporting.Add(listToAdd[i]);
+                    db.SaveChanges();
+                }
                 //db.Reporting.Add(reporting);
-                db.SaveChanges();
+                //db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(reporting);
+            //return View(reporting);
+            return View();
         }
 
         // GET: Reportings/Edit/5

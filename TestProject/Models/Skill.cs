@@ -15,7 +15,7 @@ namespace TestProject.Models
         public DateTime? created_at { get; set; }
         public DateTime? updated_at { get; set; }
 
-        public virtual GraphSkill graph_skill { get; set; }
+        //public virtual GraphSkill graph_skill { get; set; }
 
     }
 }
